@@ -35,7 +35,7 @@
 <link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="牢骚," />
+  <meta name="keywords" content="redis," />
 
 
 
@@ -51,16 +51,16 @@
 
 
 
-<meta name="description" content="2015的最后一天">
+<meta name="description" content="在我的mac机子上安装和配置redis的操作实录">
 <meta property="og:type" content="article">
-<meta property="og:title" content="写在年末">
-<meta property="og:url" content="http://qiulongjie.com/2015/12/31/写在年末/index.html">
+<meta property="og:title" content="mac上redis的安装与配置">
+<meta property="og:url" content="http://qiulongjie.com/2016/01/13/mac上redis的安装与配置/index.html">
 <meta property="og:site_name" content="devilJie的个人博客">
-<meta property="og:description" content="2015的最后一天">
-<meta property="og:updated_time" content="2015-12-31T19:00:53.000Z">
+<meta property="og:description" content="在我的mac机子上安装和配置redis的操作实录">
+<meta property="og:updated_time" content="2016-01-13T07:31:05.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="写在年末">
-<meta name="twitter:description" content="2015的最后一天">
+<meta name="twitter:title" content="mac上redis的安装与配置">
+<meta name="twitter:description" content="在我的mac机子上安装和配置redis的操作实录">
 
 
 
@@ -72,7 +72,7 @@
   };
 </script>
 
-  <title> 写在年末 | devilJie的个人博客 </title>
+  <title> mac上redis的安装与配置 | devilJie的个人博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -233,7 +233,7 @@
             
             
               
-                写在年末
+                mac上redis的安装与配置
               
             
           </h1>
@@ -242,8 +242,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2015-12-31T22:23:49+08:00" content="2015-12-31">
-              2015-12-31
+            <time itemprop="dateCreated" datetime="2016-01-13T15:20:08+08:00" content="2016-01-13">
+              2016-01-13
             </time>
           </span>
 
@@ -252,8 +252,8 @@
               &nbsp; | &nbsp; 分类于
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/日志/" itemprop="url" rel="index">
-                    <span itemprop="name">日志</span>
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
                   </a>
                 </span>
 
@@ -268,8 +268,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2015/12/31/写在年末/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/31/写在年末/" itemprop="commentsCount"></span>
+                <a href="/2016/01/13/mac上redis的安装与配置/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/13/mac上redis的安装与配置/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -288,7 +288,16 @@
       
 
       
-        <span itemprop="articleBody"><h2 id="2015的最后一天">2015的最后一天</h2><p>2015年即将滚蛋，很多人都给了自己一个年终总结，嗯，朋友圈中不少给自己总结最简洁的是：傻逼。好吧我信你了，但是我还是要文明点，我这样说吧，回顾这个浑噩的一年，整体总结：未及当初期望的三分之一。<br>这年也是深圳的第一年，1月份从津门滚粗到现在，足一年。一直供职于这家互联网公司：总体来讲，人都还不错。是否达到了自己的期望：还没。学到的东西是否达到了自己的预期：NO。最终还是得说自己不够努力。过去就这样子了，算了，滚粗去吧。<br>2016我要做什么，靠，能说得出来吗。当然还是有期望的，那就是把他妈的2015那些说要做却没做的给我搞定咯。<br>哎，文笔不好，不多说了，祝君新年快乐！</p>
+        <span itemprop="articleBody"><h2 id="安装">安装</h2><p>上redis<a href="http://redis.io/" target="_blank" rel="external">官网</a>下载最新redis版本，我下载的是redis-3.0.6.tar.gz<br>把该文件放到某个目录下进行解压<br>也可以用命令进行解压<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf redis-<span class="number">3.0</span>.<span class="number">6</span>.tar.gz</span><br></pre></td></tr></table></figure></p>
+<p>解压之后进入redis-3.0.6<br>编译<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure></p>
+<p>安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> src</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<p>然后会在/usr/local/bin目录下有redis-cli和redis-server命令脚本</p>
+<p>启动服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server</span><br></pre></td></tr></table></figure></p>
+<p>进入redis客户端<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli</span><br></pre></td></tr></table></figure></p>
+<p>======================= 安装成功</p>
+<h2 id="配置–个人习惯">配置–个人习惯</h2><p>进入到redis的安装目录，找到redis.conf文件（/Users/demondevil/mydatas/redis/redis-3.0.6/redis.conf）<br>修改daemonize为yes<br>修改pidfile为/Users/demondevil/mydatas/redis/redis_6379.pid<br>（默认的路径/var/run/redis.pid只有root用户才有权限，所有启动redis的时候生成不了这个pid文件）<br>修改logfile为/tmp/logs/redis_6379.log（日志文件）</p>
+<p>在/usr/local/bin目录下新建脚本文件redis_6379，内容如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="shebang">#!/bin/sh</span></span><br><span class="line"><span class="comment">#Configurations injected by install_server below....</span></span><br><span class="line"></span><br><span class="line">EXEC=/usr/<span class="built_in">local</span>/bin/redis-server</span><br><span class="line">CLIEXEC=/usr/<span class="built_in">local</span>/bin/redis-cli</span><br><span class="line">PIDFILE=/Users/demondevil/mydatas/redis/redis_6379.pid</span><br><span class="line">CONF=<span class="string">"/Users/demondevil/mydatas/redis/redis-3.0.6/redis.conf"</span></span><br><span class="line">REDISPORT=<span class="string">"6379"</span></span><br><span class="line"><span class="comment">###############</span></span><br><span class="line"><span class="comment"># SysV Init Information</span></span><br><span class="line"><span class="comment"># chkconfig: - 58 74</span></span><br><span class="line"><span class="comment"># description: redis_6379 is the redis daemon.</span></span><br><span class="line"><span class="comment">### BEGIN INIT INFO</span></span><br><span class="line"><span class="comment"># Provides: redis_6379</span></span><br><span class="line"><span class="comment"># Required-Start: $network $local_fs $remote_fs</span></span><br><span class="line"><span class="comment"># Required-Stop: $network $local_fs $remote_fs</span></span><br><span class="line"><span class="comment"># Default-Start: 2 3 4 5</span></span><br><span class="line"><span class="comment"># Default-Stop: 0 1 6</span></span><br><span class="line"><span class="comment"># Should-Start: $syslog $named</span></span><br><span class="line"><span class="comment"># Should-Stop: $syslog $named</span></span><br><span class="line"><span class="comment"># Short-Description: start and stop redis_6379</span></span><br><span class="line"><span class="comment"># Description: Redis daemon</span></span><br><span class="line"><span class="comment">### END INIT INFO</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="string">"<span class="variable">$1</span>"</span> <span class="keyword">in</span></span><br><span class="line">    start)</span><br><span class="line">        <span class="keyword">if</span> [ <span class="operator">-f</span> <span class="variable">$PIDFILE</span> ]</span><br><span class="line">        <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"<span class="variable">$PIDFILE</span> exists, process is already running or crashed"</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Starting Redis server..."</span></span><br><span class="line">            <span class="variable">$EXEC</span> <span class="variable">$CONF</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        ;;</span><br><span class="line">    stop)</span><br><span class="line">        <span class="keyword">if</span> [ ! <span class="operator">-f</span> <span class="variable">$PIDFILE</span> ]</span><br><span class="line">        <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"<span class="variable">$PIDFILE</span> does not exist, process is not running"</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            PID=$(cat <span class="variable">$PIDFILE</span>)</span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Stopping ..."</span></span><br><span class="line">            <span class="variable">$CLIEXEC</span> -p <span class="variable">$REDISPORT</span> shutdown</span><br><span class="line">            <span class="keyword">while</span> [ -x /proc/<span class="variable">$&#123;PID&#125;</span> ]</span><br><span class="line">            <span class="keyword">do</span></span><br><span class="line">                <span class="built_in">echo</span> <span class="string">"Waiting for Redis to shutdown ..."</span></span><br><span class="line">                sleep <span class="number">1</span></span><br><span class="line">            <span class="keyword">done</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Redis stopped"</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        ;;</span><br><span class="line">    status)</span><br><span class="line">        PID=$(cat <span class="variable">$PIDFILE</span>)</span><br><span class="line">        <span class="keyword">if</span> [ ! -x /proc/<span class="variable">$&#123;PID&#125;</span> ]</span><br><span class="line">        <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">'Redis is not running'</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Redis is running (<span class="variable">$PID</span>)"</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        ;;</span><br><span class="line">    restart)</span><br><span class="line">        <span class="variable">$0</span> stop</span><br><span class="line">        <span class="variable">$0</span> start</span><br><span class="line">        ;;</span><br><span class="line">    *)</span><br><span class="line">        <span class="built_in">echo</span> <span class="string">"Please use start, stop, restart or status as first argument"</span></span><br><span class="line">        ;;</span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure></p>
+<p>以后redis的启动、关闭、重启、查看状态的命令分别为<br>redis_6379 start<br>redis_6379 stop<br>redis_6379 restart<br>redis_6379 status</p>
 </span>
       
     </div>
@@ -297,7 +306,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/牢骚/" rel="tag">#牢骚</a>
+            <a href="/tags/redis/" rel="tag">#redis</a>
           
         </div>
       
@@ -306,17 +315,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/12/31/mac上hexo的安装/" rel="next" title="mac上hexo的安装">
-                <i class="fa fa-chevron-left"></i> mac上hexo的安装
+              <a href="/2015/12/31/写在年末/" rel="next" title="写在年末">
+                <i class="fa fa-chevron-left"></i> 写在年末
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/01/13/mac上redis的安装与配置/" rel="prev" title="mac上redis的安装与配置">
-                mac上redis的安装与配置 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -369,8 +374,8 @@
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2015/12/31/写在年末/"
-           data-title="写在年末" data-url="http://qiulongjie.com/2015/12/31/写在年末/">
+      <div class="ds-thread" data-thread-key="2016/01/13/mac上redis的安装与配置/"
+           data-title="mac上redis的安装与配置" data-url="http://qiulongjie.com/2016/01/13/mac上redis的安装与配置/">
       </div>
     
   </div>
@@ -470,7 +475,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2015的最后一天"><span class="nav-number">1.</span> <span class="nav-text">2015的最后一天</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置–个人习惯"><span class="nav-number">2.</span> <span class="nav-text">配置–个人习惯</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
