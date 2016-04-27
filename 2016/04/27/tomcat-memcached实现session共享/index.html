@@ -35,7 +35,7 @@
 <link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="分享," />
+  <meta name="keywords" content="tomcat," />
 
 
 
@@ -51,16 +51,16 @@
 
 
 
-<meta name="description" content="分享知乎好文为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发？">
+<meta name="description" content="tomcat+memcached实现session共享。官方文档https://github.com/magro/memcached-session-manager/wiki/SetupAndConfiguration">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[分享]为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发">
-<meta property="og:url" content="http://qiulongjie.com/2015/11/29/分享-为什么很多看起来不是很复杂的网站，比如-Facebook-需要大量顶尖高手来开发/index.html">
+<meta property="og:title" content="tomcat+memcached实现session共享">
+<meta property="og:url" content="http://qiulongjie.com/2016/04/27/tomcat-memcached实现session共享/index.html">
 <meta property="og:site_name" content="devilJie的个人博客">
-<meta property="og:description" content="分享知乎好文为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发？">
-<meta property="og:updated_time" content="2015-12-31T18:26:30.000Z">
+<meta property="og:description" content="tomcat+memcached实现session共享。官方文档https://github.com/magro/memcached-session-manager/wiki/SetupAndConfiguration">
+<meta property="og:updated_time" content="2016-04-27T13:14:00.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="[分享]为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发">
-<meta name="twitter:description" content="分享知乎好文为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发？">
+<meta name="twitter:title" content="tomcat+memcached实现session共享">
+<meta name="twitter:description" content="tomcat+memcached实现session共享。官方文档https://github.com/magro/memcached-session-manager/wiki/SetupAndConfiguration">
 
 
 
@@ -72,7 +72,7 @@
   };
 </script>
 
-  <title> [分享]为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发 | devilJie的个人博客 </title>
+  <title> tomcat+memcached实现session共享 | devilJie的个人博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -233,7 +233,7 @@
             
             
               
-                [分享]为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发
+                tomcat+memcached实现session共享
               
             
           </h1>
@@ -242,8 +242,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2015-11-29T23:50:04+08:00" content="2015-11-29">
-              2015-11-29
+            <time itemprop="dateCreated" datetime="2016-04-27T21:07:52+08:00" content="2016-04-27">
+              2016-04-27
             </time>
           </span>
 
@@ -268,8 +268,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2015/11/29/分享-为什么很多看起来不是很复杂的网站，比如-Facebook-需要大量顶尖高手来开发/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/11/29/分享-为什么很多看起来不是很复杂的网站，比如-Facebook-需要大量顶尖高手来开发/" itemprop="commentsCount"></span>
+                <a href="/2016/04/27/tomcat-memcached实现session共享/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/27/tomcat-memcached实现session共享/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -288,7 +288,15 @@
       
 
       
-        <span itemprop="articleBody"><h3 id="分享知乎好文">分享知乎好文</h3><p><a href="http://www.zhihu.com/question/20303645" target="_blank" rel="external">为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发？</a></p>
+        <span itemprop="articleBody"><h1 id="tomcat+memcached实现session共享">tomcat+memcached实现session共享</h1><p>官方文档<a href="https://github.com/magro/memcached-session-manager/wiki/SetupAndConfiguration" target="_blank" rel="external">https://github.com/magro/memcached-session-manager/wiki/SetupAndConfiguration</a></p>
+<h2 id="memcached安装">memcached安装</h2><p>memcached是如此的简单，我这里就不介绍了</p>
+<h2 id="session-manager配置">session-manager配置</h2><p>根据文档进行一步一步的配置</p>
+<h3 id="下载jar包">下载jar包</h3><blockquote>
+<p>首先先下载最新的并对应tomcat版本的jar文件<br><strong>memcached-session-manager-1.9.2.jar</strong><br><strong>memcached-session-manager-tc6-1.9.2.jar</strong><br><strong>spymemcached-2.11.1.jar</strong><br>然后再选择序列化方式下载对应的jar文件<br>这里我选择的是javolution方式，下载对应的最新jar文件<br><strong>javolution-5.4.3.1.jar</strong><br><strong>msm-javolution-serializer-1.9.2.jar</strong><br>然后把这5个jar文件添加到tomcat的lib目录下</p>
+</blockquote>
+<h3 id="配置context-xml文件">配置context.xml文件</h3><h4 id="方法一">方法一</h4><p>在tomcat的conf目录下找到context.xml文件，在Context节点中添加如下配置<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">Manager</span> <span class="attribute">className</span>=<span class="value">"de.javakaffee.web.msm.MemcachedBackupSessionManager"</span> </span><br><span class="line">         <span class="attribute">memcachedNodes</span>=<span class="value">"n1:192.168.0.112:12000"</span></span><br><span class="line">         <span class="attribute">sticky</span>=<span class="value">"false"</span></span><br><span class="line">         <span class="attribute">sessionBackupAsync</span>=<span class="value">"false"</span></span><br><span class="line">         <span class="attribute">lockingMode</span>=<span class="value">"uriPattern:/path1|/path2"</span></span><br><span class="line">         <span class="attribute">requestUriIgnorePattern</span>=<span class="value">".*\.(ico|png|gif|jpg|css|js)$"</span></span><br><span class="line">        <span class="attribute">transcoderFactoryClass</span>=<span class="value">"de.javakaffee.web.msm.serializer.javolution.JavolutionTranscoderFactory"</span></span><br><span class="line">         /&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="方法二">方法二</h4><p>tomcat的conf目录下找到server.xml文件，找到host节点，加入<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">Context</span> <span class="attribute">docBase</span>=<span class="value">"/var/www/html"</span> <span class="attribute">path</span>=<span class="value">""</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">Manager</span> <span class="attribute">className</span>=<span class="value">"de.javakaffee.web.msm.MemcachedBackupSessionManager"</span> </span><br><span class="line">         <span class="attribute">memcachedNodes</span>=<span class="value">"n1:192.168.0.112:12000"</span></span><br><span class="line">         <span class="attribute">sticky</span>=<span class="value">"false"</span></span><br><span class="line">         <span class="attribute">sessionBackupAsync</span>=<span class="value">"false"</span></span><br><span class="line">         <span class="attribute">lockingMode</span>=<span class="value">"uriPattern:/path1|/path2"</span></span><br><span class="line">         <span class="attribute">requestUriIgnorePattern</span>=<span class="value">".*\.(ico|png|gif|jpg|css|js)$"</span></span><br><span class="line">        <span class="attribute">transcoderFactoryClass</span>=<span class="value">"de.javakaffee.web.msm.serializer.javolution.JavolutionTranscoderFactory"</span></span><br><span class="line">         /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">Context</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>我使用的是方法一，方法二我没有进行尝试 。<br>各个属性的含义与使用wiki文档中有介绍。</p>
 </span>
       
     </div>
@@ -297,7 +305,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/分享/" rel="tag">#分享</a>
+            <a href="/tags/tomcat/" rel="tag">#tomcat</a>
           
         </div>
       
@@ -306,17 +314,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/10/30/hello-world/" rel="next" title="Hello Hexo">
-                <i class="fa fa-chevron-left"></i> Hello Hexo
+              <a href="/2016/04/25/centos下nginx的安装与配置/" rel="next" title="centos下nginx的安装与配置">
+                <i class="fa fa-chevron-left"></i> centos下nginx的安装与配置
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2015/12/31/我的Excel工具类/" rel="prev" title="我的Excel工具类">
-                我的Excel工具类 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -369,8 +373,8 @@
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2015/11/29/分享-为什么很多看起来不是很复杂的网站，比如-Facebook-需要大量顶尖高手来开发/"
-           data-title="[分享]为什么很多看起来不是很复杂的网站，比如 Facebook 需要大量顶尖高手来开发" data-url="http://qiulongjie.com/2015/11/29/分享-为什么很多看起来不是很复杂的网站，比如-Facebook-需要大量顶尖高手来开发/">
+      <div class="ds-thread" data-thread-key="2016/04/27/tomcat-memcached实现session共享/"
+           data-title="tomcat+memcached实现session共享" data-url="http://qiulongjie.com/2016/04/27/tomcat-memcached实现session共享/">
       </div>
     
   </div>
@@ -470,7 +474,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#分享知乎好文"><span class="nav-number">1.</span> <span class="nav-text">分享知乎好文</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#tomcat+memcached实现session共享"><span class="nav-number">1.</span> <span class="nav-text">tomcat+memcached实现session共享</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#memcached安装"><span class="nav-number">1.1.</span> <span class="nav-text">memcached安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#session-manager配置"><span class="nav-number">1.2.</span> <span class="nav-text">session-manager配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下载jar包"><span class="nav-number">1.2.1.</span> <span class="nav-text">下载jar包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置context-xml文件"><span class="nav-number">1.2.2.</span> <span class="nav-text">配置context.xml文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方法一"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">方法一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法二"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">方法二</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
