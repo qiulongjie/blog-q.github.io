@@ -1,0 +1,1123 @@
+<!doctype html>
+<html class="theme-next   use-motion ">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="http://7xixis.com1.z0.glb.clouddn.com/myPic5_meitu.jpg?v=0.4.5.2" />
+
+
+
+
+
+
+<meta name="description" content="记录搭建redis集群和redis集群监控redis-stat时的步骤和问题解决方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis集群及redis集群监控redis-stat搭建">
+<meta property="og:url" content="http://qiulongjie.com/2016/11/25/redis-cluster-redis-stat-build/index.html">
+<meta property="og:site_name" content="devilJie的个人博客">
+<meta property="og:description" content="记录搭建redis集群和redis集群监控redis-stat时的步骤和问题解决方法">
+<meta property="og:updated_time" content="2017-01-13T07:34:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis集群及redis集群监控redis-stat搭建">
+<meta name="twitter:description" content="记录搭建redis集群和redis集群监控redis-stat时的步骤和问题解决方法">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post',
+    motion: true
+  };
+</script>
+
+  <title> redis集群及redis集群监控redis-stat搭建 | devilJie的个人博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?fb8bc249b394d0c80a4eefffa5a4557a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">devilJie的个人博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">白发残魔</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu menu-left">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <form class="site-search-form">
+    <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+  </form>
+
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'y97b8v_yxziHBXvaYxqt','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                redis集群及redis集群监控redis-stat搭建
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2016-11-25T10:42:11+08:00" content="2016-11-25">
+              2016-11-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp; 分类于
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/25/redis-cluster-redis-stat-build/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/25/redis-cluster-redis-stat-build/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><h1 id="redis集群搭建笔记">redis集群搭建笔记</h1><h2 id="节点规划">节点规划</h2><p>准备了3台机子，每台机子设置两个redis几点，规划如下<br>192.168.0.131:7001(master)<br>192.168.0.131:7002(slave)<br>192.168.0.132:7001(master)<br>192.168.0.132:7002(slave)<br>192.168.0.133:7001(master)<br>192.168.0.133:7002(slave)</p>
+<h2 id="安装步骤">安装步骤</h2><h3 id="安装ruby">安装ruby</h3><h4 id="1、下载与上传">1、下载与上传</h4><p>下载ruby安装包<a href="https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.1.tar.gz" target="_blank" rel="external">https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.1.tar.gz</a><br>使用scp命令把下载好的文件上传到3个主机中（安装包我下载到/Users/demondevil/mydatas/softs/ruby/路径中）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">scp /Users/demondevil/mydatas/softs/ruby/ruby-<span class="number">2.3</span>.<span class="number">1</span>.tar.gz root@<span class="number">192.168</span>.<span class="number">0.131</span>:/home/softs</span><br><span class="line">scp /Users/demondevil/mydatas/softs/ruby/ruby-<span class="number">2.3</span>.<span class="number">1</span>.tar.gz root@<span class="number">192.168</span>.<span class="number">0.132</span>:/home/softs</span><br><span class="line">scp /Users/demondevil/mydatas/softs/ruby/ruby-<span class="number">2.3</span>.<span class="number">1</span>.tar.gz root@<span class="number">192.168</span>.<span class="number">0.133</span>:/home/softs</span><br><span class="line">``` </span><br><span class="line"></span><br><span class="line"><span class="comment">#### 2、安装</span></span><br><span class="line">登陆主机</span><br><span class="line">``` bash</span><br><span class="line">ssh root@<span class="number">192.168</span>.<span class="number">0.131</span></span><br><span class="line">``` </span><br><span class="line">解压</span><br><span class="line">``` bash</span><br><span class="line"><span class="built_in">cd</span> /home/softs/</span><br><span class="line">tar -zxvf ruby-<span class="number">2.3</span>.<span class="number">1</span>.tar.gz</span><br></pre></td></tr></table></figure></p>
+<p>配置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ruby-<span class="number">2.3</span>.<span class="number">1</span></span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/ruby</span><br></pre></td></tr></table></figure></p>
+<p>编译与安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">make</span><br><span class="line">make install</span><br><span class="line">``` </span><br><span class="line">设置环境变量</span><br><span class="line">``` bash</span><br><span class="line">vim /etc/profile</span><br><span class="line">``` </span><br><span class="line">在最后面添加一行</span><br><span class="line"></span><br><span class="line">&gt; <span class="built_in">export</span> PATH=/usr/<span class="built_in">local</span>/ruby/bin:<span class="variable">$PATH</span></span><br><span class="line"></span><br><span class="line">使配置起作用</span><br><span class="line">``` bash</span><br><span class="line"><span class="built_in">source</span> /etc/profile</span><br><span class="line">``` </span><br><span class="line">查看是否配置成功</span><br><span class="line">``` bash</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$PATH</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="安装redis-3-0-7-gem">安装redis-3.0.7.gem</h3><h4 id="方法一">方法一</h4><p>下载安装redis-3.0.7.gem,安装目的是使得ruby可以与redis集群通信,这样子就可以使用 redis-trib.rb工具管理集群了<br>下载<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /home/softs/</span><br><span class="line">wget --no-check-certificate https://rubygems.global.ssl.fastly.net/gems/redis-<span class="number">3.0</span>.<span class="number">7</span>.gem</span><br><span class="line">``` </span><br><span class="line">安装</span><br><span class="line">``` bash</span><br><span class="line">gem install <span class="operator">-l</span> redis-<span class="number">3.0</span>.<span class="number">7</span>.gem</span><br><span class="line">``` </span><br><span class="line">报错</span><br><span class="line"></span><br><span class="line">&gt; cannot load such file -- zlib</span><br><span class="line"></span><br><span class="line">下载安装zlib</span><br><span class="line">``` bash</span><br><span class="line">wget http://down1.chinaunix.net/distfiles/zlib-<span class="number">1.2</span>.<span class="number">7</span>.tar.gz</span><br><span class="line">tar -zxvf zlib-<span class="number">1.2</span>.<span class="number">7</span>.tar.gz</span><br><span class="line"><span class="built_in">cd</span> zlib-<span class="number">1.2</span>.<span class="number">7</span></span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<p>再次运行gem install -l redis-3.0.7.gem还是报相同的错误，解决方法<br>进入ruby源码文件夹<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /home/softs/ruby-<span class="number">2.3</span>.<span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<p>安装ruby自身提供的zlib包<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ext/zlib</span><br><span class="line">ruby ./extconf.rb</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<p>回到redis-3.0.7.gem当前目录<br>再次运行gem install -l redis-3.0.7.gem成功</p>
+<h4 id="方法二">方法二</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">gem install redis</span><br><span class="line">``` </span><br><span class="line">执行报错</span><br><span class="line">&gt;Unable to require openssl, install OpenSSL and rebuild ruby (preferred) or use non-HTTPS sources</span><br><span class="line"></span><br><span class="line">解决方法</span><br><span class="line">``` bash</span><br><span class="line">yum -y install openssl-devel</span><br><span class="line">yum -y install openssl</span><br></pre></td></tr></table></figure>
+<p>进入ruby 源码目录下的ext/openssl 目录<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby extconf.rb</span><br></pre></td></tr></table></figure></p>
+<p>将ruby 源码目录下的include 目录软链接到 / 目录下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ln <span class="operator">-s</span> /home/softs/ruby-<span class="number">2.3</span>.<span class="number">1</span>/include/ /</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<p>再次执行gem install redis成功</p>
+<p>如果有报源的错误则进行gem源更换，方法如下<br>gem使用的是<a href="https://rubygems.org/，境外源，国内无法访问" target="_blank" rel="external">https://rubygems.org/，境外源，国内无法访问</a><br>解决办法：<br>更换gem源为<a href="https://ruby.taobao.org/，淘宝源" target="_blank" rel="external">https://ruby.taobao.org/，淘宝源</a><br>查看当前使用源<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gem <span class="built_in">source</span> –l</span><br><span class="line">结果显示</span><br><span class="line"> *** CURRENT SOURCES ***</span><br><span class="line">https://rubygems.org/</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gem <span class="built_in">source</span> <span class="operator">-a</span> https://ruby.taobao.org/ <span class="comment">#添加淘宝源</span></span><br><span class="line">gem <span class="built_in">source</span> -r https://rubygems.org/	<span class="comment">#删除境外源</span></span><br></pre></td></tr></table></figure>
+<p>192.168.0.131和192.168.0.133使用的是方法一<br>192.168.0.132使用的是方法二</p>
+<h3 id="安装redis">安装redis</h3><h4 id="安装">安装</h4><p>下载安装包<br><a href="http://download.redis.io/releases/redis-3.0.7.tar.gz" target="_blank" rel="external">http://download.redis.io/releases/redis-3.0.7.tar.gz</a><br>上传至主机<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scp /Users/demondevil/mydatas/softs/redis/redis-<span class="number">3.0</span>.<span class="number">7</span>.tar.gz root@<span class="number">192.168</span>.<span class="number">0.131</span>:/home/softs</span><br><span class="line">scp /Users/demondevil/mydatas/softs/redis/redis-<span class="number">3.0</span>.<span class="number">7</span>.tar.gz root@<span class="number">192.168</span>.<span class="number">0.132</span>:/home/softs</span><br><span class="line">scp /Users/demondevil/mydatas/softs/redis/redis-<span class="number">3.0</span>.<span class="number">7</span>.tar.gz root@<span class="number">192.168</span>.<span class="number">0.133</span>:/home/softs</span><br></pre></td></tr></table></figure></p>
+<p>编译与安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /home/softs</span><br><span class="line">tar -zxvf redis-<span class="number">3.0</span>.<span class="number">7</span>.tar.gz</span><br><span class="line"><span class="built_in">cd</span> redis-<span class="number">3.0</span>.<span class="number">7</span></span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line">``` </span><br><span class="line"><span class="comment">#### 配置 </span></span><br><span class="line">对<span class="number">192.168</span>.<span class="number">0.131</span>主机进行如下操作</span><br><span class="line">``` bash</span><br><span class="line"><span class="built_in">cd</span> /home/softs/redis-<span class="number">3.0</span>.<span class="number">7</span>/src</span><br><span class="line">cp redis-cli /usr/<span class="built_in">local</span>/bin/</span><br><span class="line">cp redis-server /usr/<span class="built_in">local</span>/bin/</span><br><span class="line">cp redis-trib.rb /usr/<span class="built_in">local</span>/bin/</span><br><span class="line"><span class="built_in">cd</span>  /home/softs/</span><br><span class="line">mkdir redis-cluster</span><br><span class="line"><span class="built_in">cd</span> redis-cluster</span><br><span class="line">mkdir data</span><br><span class="line">mkdir <span class="built_in">log</span></span><br></pre></td></tr></table></figure></p>
+<p>创建并编辑7001端口的redis命令脚本，用于启动停止等<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim redis_7001</span><br></pre></td></tr></table></figure></p>
+<p>redis_7001文件内容如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="shebang">#!/bin/sh</span></span><br><span class="line"><span class="comment">#Configurations injected by install_server below....</span></span><br><span class="line"></span><br><span class="line">EXEC=/usr/<span class="built_in">local</span>/bin/redis-server</span><br><span class="line">CLIEXEC=/usr/<span class="built_in">local</span>/bin/redis-cli</span><br><span class="line">PIDFILE=/home/softs/redis-cluster/data/redis-<span class="number">7001</span>.pid</span><br><span class="line">CONF=<span class="string">"/home/softs/redis-cluster/redis_7001.conf"</span></span><br><span class="line">REDISPORT=<span class="string">"7001"</span></span><br><span class="line"><span class="comment">###############</span></span><br><span class="line"><span class="comment"># SysV Init Information</span></span><br><span class="line"><span class="comment"># chkconfig: - 58 74</span></span><br><span class="line"><span class="comment"># description: redis_6379 is the redis daemon.</span></span><br><span class="line"><span class="comment">### BEGIN INIT INFO</span></span><br><span class="line"><span class="comment"># Provides: redis_7001</span></span><br><span class="line"><span class="comment"># Required-Start: $network $local_fs $remote_fs</span></span><br><span class="line"><span class="comment"># Required-Stop: $network $local_fs $remote_fs</span></span><br><span class="line"><span class="comment"># Default-Start: 2 3 4 5</span></span><br><span class="line"><span class="comment"># Default-Stop: 0 1 6</span></span><br><span class="line"><span class="comment"># Should-Start: $syslog $named</span></span><br><span class="line"><span class="comment"># Should-Stop: $syslog $named</span></span><br><span class="line"><span class="comment"># Short-Description: start and stop redis_7001</span></span><br><span class="line"><span class="comment"># Description: Redis daemon</span></span><br><span class="line"><span class="comment">### END INIT INFO</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="string">"<span class="variable">$1</span>"</span> <span class="keyword">in</span></span><br><span class="line">    start)</span><br><span class="line">        <span class="keyword">if</span> [ <span class="operator">-f</span> <span class="variable">$PIDFILE</span> ]</span><br><span class="line">        <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"<span class="variable">$PIDFILE</span> exists, process is already running or crashed"</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Starting Redis server..."</span></span><br><span class="line">            <span class="variable">$EXEC</span> <span class="variable">$CONF</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        ;;</span><br><span class="line">    stop)</span><br><span class="line">        <span class="keyword">if</span> [ ! <span class="operator">-f</span> <span class="variable">$PIDFILE</span> ]</span><br><span class="line">        <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"<span class="variable">$PIDFILE</span> does not exist, process is not running"</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            PID=$(cat <span class="variable">$PIDFILE</span>)</span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Stopping ..."</span></span><br><span class="line">            <span class="variable">$CLIEXEC</span> -p <span class="variable">$REDISPORT</span> shutdown</span><br><span class="line">            <span class="keyword">while</span> [ -x /proc/<span class="variable">$&#123;PID&#125;</span> ]</span><br><span class="line">            <span class="keyword">do</span></span><br><span class="line">                <span class="built_in">echo</span> <span class="string">"Waiting for Redis to shutdown ..."</span></span><br><span class="line">                sleep <span class="number">1</span></span><br><span class="line">            <span class="keyword">done</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Redis stopped"</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        ;;</span><br><span class="line">    status)</span><br><span class="line">        PID=$(cat <span class="variable">$PIDFILE</span>)</span><br><span class="line">        <span class="keyword">if</span> [ ! -x /proc/<span class="variable">$&#123;PID&#125;</span> ]</span><br><span class="line">        <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">'Redis is not running'</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Redis is running (<span class="variable">$PID</span>)"</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        ;;</span><br><span class="line">    restart)</span><br><span class="line">        <span class="variable">$0</span> stop</span><br><span class="line">        <span class="variable">$0</span> start</span><br><span class="line">        ;;</span><br><span class="line">    *)</span><br><span class="line">        <span class="built_in">echo</span> <span class="string">"Please use start, stop, restart or status as first argument"</span></span><br><span class="line">        ;;</span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure></p>
+<p>创建并编辑7001端口的redis配置文件，用于集群<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line">vim redis_7001.conf</span><br><span class="line">``` </span><br><span class="line">redis_7001.conf配置文件内容如下</span><br><span class="line">``` bash</span><br><span class="line"><span class="comment">################################ GENERAL  #####################################</span></span><br><span class="line"></span><br><span class="line">daemonize yes</span><br><span class="line">pidfile /home/softs/redis-cluster/data/redis-<span class="number">7001</span>.pid</span><br><span class="line">port <span class="number">7001</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># TCP listen() backlog.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># In high requests-per-second environments you need an high backlog in order</span></span><br><span class="line"><span class="comment"># to avoid slow clients connections issues. Note that the Linux kernel</span></span><br><span class="line"><span class="comment"># will silently truncate it to the value of /proc/sys/net/core/somaxconn so</span></span><br><span class="line"><span class="comment"># make sure to raise both the value of somaxconn and tcp_max_syn_backlog</span></span><br><span class="line"><span class="comment"># in order to get the desired effect.</span></span><br><span class="line"><span class="comment">#需要修改somaxconn and tcp_max_syn_backlog</span></span><br><span class="line">tcp-backlog <span class="number">1500</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#客户端空闲多长时间，关闭链接。0表示不关闭；此处表示空闲20s后关闭连接</span></span><br><span class="line">timeout <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#心跳包,60s未收到心跳认为其死亡</span></span><br><span class="line">tcp-keepalive <span class="number">60</span></span><br><span class="line"></span><br><span class="line">loglevel notice</span><br><span class="line"></span><br><span class="line">logfile <span class="string">"/home/softs/redis-cluster/log/redis-7001.log"</span></span><br><span class="line"></span><br><span class="line">databases <span class="number">16</span></span><br><span class="line"></span><br><span class="line"><span class="comment">################################ SNAPSHOTTING  ################################</span></span><br><span class="line"></span><br><span class="line">dir /home/softs/redis-cluster/data</span><br><span class="line"></span><br><span class="line"><span class="comment">################################# REPLICATION #################################</span></span><br><span class="line"><span class="comment"># 当从库同主机失去连接或者复制正在进行，从机库有两种运行方式：</span></span><br><span class="line"><span class="comment">#yes(默认设置)，从库会继续相应客户端的请求</span></span><br><span class="line"><span class="comment">#no除了INFO和SLAVOF命令之外的任何请求都会返回一个错误"SYNC with master in progress"</span></span><br><span class="line">slave-serve-stale-data yes</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Since Redis 2.6 by default slaves are read-only.</span></span><br><span class="line">slave-read-only yes</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#slave会每隔repl-ping-slave-period(默认10秒)ping一次master，如果超过repl-timeout(默认 60秒)都没有收到响应，就会认为Master挂了。如果Master明明没挂但被阻塞住了也会报MASTER time out: no data nor PING received…这个错。</span></span><br><span class="line"><span class="comment">#slave每隔10s向主发送一次心跳</span></span><br><span class="line">repl-ping-slave-period <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#slave认为复制超时时间</span></span><br><span class="line">repl-timeout <span class="number">120</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在slave和master同步后（发送psync/sync），后续的同步是否设置成TCP_NODELAY</span></span><br><span class="line"><span class="comment">#假如设置成yes，则redis会合并小的TCP包从而节省带宽，但会增加同步延迟（40ms），造成master与slave数据不一致</span></span><br><span class="line"><span class="comment">#假如设置成no，则redis master会立即发送同步数据，没有延迟</span></span><br><span class="line"><span class="comment">#前者关注性能，后者关注一致性</span></span><br><span class="line">repl-disable-tcp-nodelay yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#多slave竞争转换为master的权值</span></span><br><span class="line">slave-priority <span class="number">100</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">################################## SECURITY ###################################</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">################################### LIMITS ####################################</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Set the max number of connected clients at the same time. By default</span></span><br><span class="line"><span class="comment"># this limit is set to 10000 clients, however if the Redis server is not</span></span><br><span class="line"><span class="comment"># able to configure the process file limit to allow for the specified limit</span></span><br><span class="line"><span class="comment"># the max number of allowed clients is set to the current file limit</span></span><br><span class="line"><span class="comment"># minus 32 (as Redis reserves a few file descriptors for internal uses).</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Once the limit is reached Redis will close all the new connections sending</span></span><br><span class="line"><span class="comment"># an error 'max number of clients reached'.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">maxclients <span class="number">20000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Don't use more memory than the specified amount of bytes.</span></span><br><span class="line"><span class="comment">#外网40G的阀值，达到阀值开始清理数据</span></span><br><span class="line"><span class="comment">#maxmemory 40G</span></span><br><span class="line">maxmemory <span class="number">1</span>G</span><br><span class="line"></span><br><span class="line">maxmemory-policy allkeys-lru</span><br><span class="line"></span><br><span class="line"><span class="comment">############################## APPEND ONLY MODE ###############################</span></span><br><span class="line"><span class="comment">#不开启aof功能，该项目下配置的所有参数都不会生效</span></span><br><span class="line">appendonly no</span><br><span class="line"></span><br><span class="line"><span class="comment"># The name of the append only file (default: "appendonly.aof")</span></span><br><span class="line">appendfilename <span class="string">"appendonly.aof"</span></span><br><span class="line">appendfsync everysec</span><br><span class="line"><span class="comment">#重写aof的期间新的写操作不要fsync,暂时存在内存中，等rewrite完成后再写入</span></span><br><span class="line">no-appendfsync-on-rewrite yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#达到上一份文件的80%或者文件至少达到1g时候才开始rewrite aof</span></span><br><span class="line">auto-aof-rewrite-percentage <span class="number">80</span>-<span class="number">100</span></span><br><span class="line">auto-aof-rewrite-min-size <span class="number">1</span>G</span><br><span class="line"></span><br><span class="line"><span class="comment">#aof rewrite过程中,是否采取增量文件同步策略,默认为“yes</span></span><br><span class="line">aof-rewrite-incremental-fsync yes</span><br><span class="line">aof-load-truncated yes</span><br><span class="line"></span><br><span class="line"><span class="comment">################################ LUA SCRIPTING  ###############################</span></span><br><span class="line"></span><br><span class="line">lua-time-limit <span class="number">5000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">################################ REDIS CLUSTER  ###############################</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">cluster-enabled yes</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">cluster-config-file nodes-<span class="number">7001</span>.conf</span><br><span class="line"></span><br><span class="line"><span class="comment">#节点超时时间20s认为超时 </span></span><br><span class="line">cluster-node-timeout <span class="number">20000</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">cluster-migration-barrier <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">################################## SLOW LOG ###################################</span></span><br><span class="line"><span class="comment">#记录查询超过200毫秒的所有查询</span></span><br><span class="line">slowlog-log-slower-than <span class="number">200000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># There is no limit to this length. Just be aware that it will consume memory.</span></span><br><span class="line"><span class="comment"># You can reclaim memory used by the slow log with SLOWLOG RESET.</span></span><br><span class="line"><span class="comment">#日志超过128后旧的记录被移除，以回收内存</span></span><br><span class="line">slowlog-max-len <span class="number">128</span></span><br><span class="line"></span><br><span class="line"><span class="comment">################################ LATENCY MONITOR ##############################</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">hash</span>-max-ziplist-entries <span class="number">512</span></span><br><span class="line"><span class="built_in">hash</span>-max-ziplist-value <span class="number">64</span></span><br><span class="line">list-max-ziplist-entries <span class="number">512</span></span><br><span class="line">list-max-ziplist-value <span class="number">64</span></span><br><span class="line"><span class="built_in">set</span>-max-intset-entries <span class="number">512</span></span><br><span class="line">zset-max-ziplist-entries <span class="number">128</span></span><br><span class="line">zset-max-ziplist-value <span class="number">64</span></span><br><span class="line">activerehashing yes</span><br><span class="line"></span><br><span class="line">client-output-buffer-limit normal <span class="number">0</span> <span class="number">0</span> <span class="number">0</span></span><br><span class="line">client-output-buffer-limit slave <span class="number">512</span>mb <span class="number">300</span>mb <span class="number">60</span></span><br><span class="line">client-output-buffer-limit pubsub <span class="number">32</span>mb <span class="number">8</span>mb <span class="number">60</span></span><br><span class="line"></span><br><span class="line">hz <span class="number">10</span></span><br></pre></td></tr></table></figure></p>
+<p>把命令脚本文件拷贝到/usr/local/bin/目录便于使用redis_7001命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cp redis_7001 /usr/<span class="built_in">local</span>/bin/</span><br><span class="line">``` </span><br><span class="line">接着配置<span class="number">7002</span>端口</span><br><span class="line">``` bash</span><br><span class="line">cp redis_7001 redis_7002</span><br><span class="line">vim redis_7002(把里面的<span class="number">7001</span>改为<span class="number">7002</span>)</span><br><span class="line">cp redis_7002 /usr/<span class="built_in">local</span>/bin/</span><br><span class="line">cp redis_7001.conf redis_7002.conf</span><br><span class="line">vim redis_7002.conf(把里面的<span class="number">7001</span>改为<span class="number">7002</span>)</span><br></pre></td></tr></table></figure></p>
+<p>添加执行权限<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod u+x /usr/<span class="built_in">local</span>/bin/redis_*</span><br></pre></td></tr></table></figure></p>
+<p>启动redis<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis_7001 start</span><br><span class="line">redis_7002 start</span><br></pre></td></tr></table></figure></p>
+<p>停止redis<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis_7001 stop</span><br><span class="line">redis_7002 stop</span><br></pre></td></tr></table></figure></p>
+<p>启动之后查看进程<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ps -ef |grep redis</span><br><span class="line">root     <span class="number">24381</span>     <span class="number">1</span>  <span class="number">0</span> <span class="number">08</span>:<span class="number">09</span> ?        <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> /usr/<span class="built_in">local</span>/bin/redis-server *:<span class="number">7001</span> [cluster]                        </span><br><span class="line">root     <span class="number">24418</span>     <span class="number">1</span>  <span class="number">4</span> <span class="number">08</span>:<span class="number">17</span> ?        <span class="number">00</span>:<span class="number">00</span>:<span class="number">01</span> /usr/<span class="built_in">local</span>/bin/redis-server *:<span class="number">7002</span> [cluster]                        </span><br><span class="line">root     <span class="number">24425</span> <span class="number">24165</span>  <span class="number">6</span> <span class="number">08</span>:<span class="number">18</span> pts/<span class="number">0</span>    <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> grep redis</span><br></pre></td></tr></table></figure></p>
+<p>对192.168.0.133进行和192.168.0.132相同的操作</p>
+<h3 id="启动集群">启动集群</h3><p>通过redis-trib创建cluster</p>
+<blockquote>
+<p>–replicas 则指定了为Redis Cluster中的每个Master节点配备几个Slave节点<br>要求至少6个节点、3个master节点<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-trib.rb create --replicas <span class="number">1</span> <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span></span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>输出结果<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; Creating cluster</span><br><span class="line">&gt;&gt;&gt; Performing <span class="built_in">hash</span> slots allocation on <span class="number">6</span> nodes...</span><br><span class="line">Using <span class="number">3</span> masters:</span><br><span class="line"><span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span></span><br><span class="line"><span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span></span><br><span class="line"><span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span></span><br><span class="line">Adding replica <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span> to <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span></span><br><span class="line">Adding replica <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span> to <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span></span><br><span class="line">Adding replica <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span> to <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span></span><br><span class="line">M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span></span><br><span class="line">   slots:<span class="number">0</span>-<span class="number">5460</span> (<span class="number">5461</span> slots) master</span><br><span class="line">M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span></span><br><span class="line">   slots:<span class="number">5461</span>-<span class="number">10922</span> (<span class="number">5462</span> slots) master</span><br><span class="line">M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span></span><br><span class="line">   slots:<span class="number">10923</span>-<span class="number">16383</span> (<span class="number">5461</span> slots) master</span><br><span class="line">S: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span></span><br><span class="line">   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8</span><br><span class="line">S: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span></span><br><span class="line">   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0</span><br><span class="line">S: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span></span><br><span class="line">   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5</span><br><span class="line">Can I <span class="built_in">set</span> the above configuration? (<span class="built_in">type</span> <span class="string">'yes'</span> to accept): yes</span><br><span class="line">&gt;&gt;&gt; Nodes configuration updated</span><br><span class="line">&gt;&gt;&gt; Assign a different config epoch to each node</span><br><span class="line">&gt;&gt;&gt; Sending CLUSTER MEET messages to join the cluster</span><br><span class="line">Waiting <span class="keyword">for</span> the cluster to join......</span><br><span class="line">&gt;&gt;&gt; Performing Cluster Check (using node <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span>)</span><br><span class="line">M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span></span><br><span class="line">   slots:<span class="number">0</span>-<span class="number">5460</span> (<span class="number">5461</span> slots) master</span><br><span class="line">M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span></span><br><span class="line">   slots:<span class="number">5461</span>-<span class="number">10922</span> (<span class="number">5462</span> slots) master</span><br><span class="line">M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span></span><br><span class="line">   slots:<span class="number">10923</span>-<span class="number">16383</span> (<span class="number">5461</span> slots) master</span><br><span class="line">M: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span></span><br><span class="line">   slots: (<span class="number">0</span> slots) master</span><br><span class="line">   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8</span><br><span class="line">M: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span></span><br><span class="line">   slots: (<span class="number">0</span> slots) master</span><br><span class="line">   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0</span><br><span class="line">M: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span></span><br><span class="line">   slots: (<span class="number">0</span> slots) master</span><br><span class="line">   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5</span><br><span class="line">[OK] All nodes agree about slots configuration.</span><br><span class="line">&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...</span><br><span class="line">&gt;&gt;&gt; Check slots coverage...</span><br><span class="line">[OK] All <span class="number">16384</span> slots covered.</span><br></pre></td></tr></table></figure></p>
+<p>根据信息可知master、slave对应节点<br>192.168.0.131:7001(master)—&gt;192.168.0.132:7002(slave)<br>192.168.0.132:7001(master)—&gt;192.168.0.131:7002(slave)<br>192.168.0.133:7001(master)—&gt;192.168.0.133:7002(slave)</p>
+<p>检查集群信息<br>redis-trib.rb check anyExistNodeIp:port<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-trib.rb check <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span></span><br></pre></td></tr></table></figure></p>
+<p>即可查看集群的相关信息</p>
+<p>集群模式登录redis客户端</p>
+<pre><code class="bash">redis-cli -c -p <span class="number">7001</span>
+</code></pre>
+<h3 id="在线添加/删除节点">在线添加/删除节点</h3><p>先在192.168.0.133上添加两个redis服务</p>
+<pre><code class="bash"><span class="built_in">cd</span> /home/softs/redis-cluster/
+cp redis_7001 redis_7003
+cp redis_7001 redis_7004
+cp redis_7001.conf redis_7003.conf
+cp redis_7001.conf redis_7004.conf
+</code></pre>
+<p> 修改这4个文件，把7001改为对应的端口</p>
+<pre><code class="bash">cp redis_7003 /usr/<span class="built_in">local</span>/bin/
+cp redis_7004 /usr/<span class="built_in">local</span>/bin/
+chmod u+x /usr/<span class="built_in">local</span>/bin/redis_700*
+</code></pre>
+<p>启动redis</p>
+<pre><code class="bash">redis_7003 start
+redis_7004 start
+</code></pre>
+<h4 id="添加master节点">添加master节点</h4><p>执行redis-trib.rbadd-nodenewNodeIp:portanyExistNodeIp:port将新节点加入到 集群中</p>
+<pre><code class="bash">redis-trib.rb add-node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+</code></pre>
+<p>输出下面信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Adding node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span> to cluster <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+&gt;&gt;&gt; Performing Cluster Check (using node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>)
+M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+   slots:<span class="number">10923</span>-<span class="number">16383</span> (<span class="number">5461</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5
+S: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8
+M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span>
+   slots:<span class="number">5461</span>-<span class="number">10922</span> (<span class="number">5462</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0
+M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span>
+   slots:<span class="number">0</span>-<span class="number">5460</span> (<span class="number">5461</span> slots) master
+   <span class="number">1</span> additional replica(s)
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All <span class="number">16384</span> slots covered.
+&gt;&gt;&gt; Send CLUSTER MEET to node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span> to make it join the cluster.
+[OK] New node added correctly.
+</code></pre>
+<p>检查集群信息</p>
+<pre><code class="bash">redis-trib.rb check <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+</code></pre>
+<p>输出信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Performing Cluster Check (using node <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>)
+S: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8
+M: b04d24e465d199e9f1a4fe52298dcaa9b48c187d <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>
+   slots: (<span class="number">0</span> slots) master
+   <span class="number">0</span> additional replica(s)
+M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span>
+   slots:<span class="number">0</span>-<span class="number">5460</span> (<span class="number">5461</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0
+M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span>
+   slots:<span class="number">5461</span>-<span class="number">10922</span> (<span class="number">5462</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5
+M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+   slots:<span class="number">10923</span>-<span class="number">16383</span> (<span class="number">5461</span> slots) master
+   <span class="number">1</span> additional replica(s)
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All <span class="number">16384</span> slots covered.
+</code></pre>
+<h4 id="分配slot">分配slot</h4><p>数据分片redis-trib.rb reshard anyExistNodeIp:port</p>
+<pre><code class="bash">redis-trib.rb reshard <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+</code></pre>
+<p>输出信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Performing Cluster Check (using node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>)
+M: b04d24e465d199e9f1a4fe52298dcaa9b48c187d <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>
+   slots: (<span class="number">0</span> slots) master
+   <span class="number">0</span> additional replica(s)
+S: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8
+S: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5
+S: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0
+M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span>
+   slots:<span class="number">0</span>-<span class="number">5460</span> (<span class="number">5461</span> slots) master
+   <span class="number">1</span> additional replica(s)
+M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span>
+   slots:<span class="number">5461</span>-<span class="number">10922</span> (<span class="number">5462</span> slots) master
+   <span class="number">1</span> additional replica(s)
+M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+   slots:<span class="number">10923</span>-<span class="number">16383</span> (<span class="number">5461</span> slots) master
+   <span class="number">1</span> additional replica(s)
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All <span class="number">16384</span> slots covered.
+--- 想要移动的slots的个数 
+--- 想要移动的slots个数,如果是想移除某个节点,则该处的slots个数应该是此将要移除的节点上的slots个数
+How many slots <span class="keyword">do</span> you want to move (from <span class="number">1</span> to <span class="number">16384</span>)? <span class="number">2500</span>
+--- 哪个节点将会接收这些移动的slots，这里就是新添加的节点的nodeID，即b04d24e465d199e9f1a4fe52298dcaa9b48c187d
+What is the receiving node ID? b04d24e465d199e9f1a4fe52298dcaa9b48c187d
+--- 选择要移动的slots数据来源
+Please enter all the <span class="built_in">source</span> node IDs.
+--- all表示均衡的从所有节点中获取slot
+  Type <span class="string">'all'</span> to use all the nodes as <span class="built_in">source</span> nodes <span class="keyword">for</span> the <span class="built_in">hash</span> slots.
+--- 输入某个或者几个节点上面的slot并且以<span class="keyword">done</span>结束
+  Type <span class="string">'done'</span> once you entered all the <span class="built_in">source</span> nodes IDs.
+Source node <span class="comment">#1:4cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5</span>
+Source node <span class="comment">#2:done</span>
+Do you want to proceed with the proposed reshard plan (yes/no)? yes
+</code></pre>
+<p>— 后面的中文是对应的解释，自己加上去。</p>
+<h4 id="添加对应的slave节点">添加对应的slave节点</h4><pre><code class="bash">redis-trib.rb add-node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7004</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+</code></pre>
+<p>连接到要添加的slave数据库中,然后执行replicate操作,id为该slave node应对的master nodeid即对应新添加的192.168.0.133:7003节点的nodeid</p>
+<pre><code class="bash">redis-cli -h <span class="number">192.168</span>.<span class="number">0.133</span> -p <span class="number">7004</span>
+cluster replicate b04d24e465d199e9f1a4fe52298dcaa9b48c187d
+</code></pre>
+<p>再检查集群信息</p>
+<pre><code class="bash">redis-trib.rb check <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+</code></pre>
+<p>输出信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Performing Cluster Check (using node <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>)
+S: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8
+M: b04d24e465d199e9f1a4fe52298dcaa9b48c187d <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>
+   slots:<span class="number">0</span>-<span class="number">188</span>,<span class="number">5461</span>-<span class="number">7580</span>,<span class="number">10923</span>-<span class="number">11112</span> (<span class="number">2499</span> slots) master
+   <span class="number">1</span> additional replica(s)
+M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span>
+   slots:<span class="number">189</span>-<span class="number">5460</span> (<span class="number">5272</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0
+M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span>
+   slots:<span class="number">7581</span>-<span class="number">10922</span> (<span class="number">3342</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: eb5e0e1d3736f34137a6c60e50c3315add8c2355 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7004</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates b04d24e465d199e9f1a4fe52298dcaa9b48c187d
+S: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5
+M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+   slots:<span class="number">11113</span>-<span class="number">16383</span> (<span class="number">5271</span> slots) master
+   <span class="number">1</span> additional replica(s)
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All <span class="number">16384</span> slots covered.
+</code></pre>
+<h4 id="删除节点">删除节点</h4><p>删除192.168.0.133:7003(master),192.168.0.133:7004(slave)两个节点<br>使用redis-trib.rb del-node willRemoveNodeIp:port willRemoveNodeID命令依次删除从节 点和主节点<br>——— 先删除slave节点</p>
+<pre><code class="bash">redis-trib.rb del-node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7004</span> eb5e0e1d3736f34137a6c60e50c3315add8c2355
+</code></pre>
+<p>输出信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Removing node eb5e0e1d3736f34137a6c60e50c3315add8c2355 from cluster <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7004</span>
+&gt;&gt;&gt; Sending CLUSTER FORGET messages to the cluster...
+&gt;&gt;&gt; SHUTDOWN the node.
+</code></pre>
+<p>——— 删除master节点<br>删除master节点之前先把该节点上对应全部slot迁移到另外一个节点上，目前redis-trib.rb一次只能迁移到一个节点上<br>1：移除master节点上的全部slot，使用命令redis-trib.rb reshard anyExistNodeIp:port</p>
+<pre><code class="bash">redis-trib.rb reshard <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+</code></pre>
+<p>输出信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Performing Cluster Check (using node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>)
+M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+   slots:<span class="number">11113</span>-<span class="number">16383</span> (<span class="number">5271</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5
+S: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8
+M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span>
+   slots:<span class="number">7581</span>-<span class="number">10922</span> (<span class="number">3342</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0
+M: b04d24e465d199e9f1a4fe52298dcaa9b48c187d <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>
+   slots:<span class="number">0</span>-<span class="number">188</span>,<span class="number">5461</span>-<span class="number">7580</span>,<span class="number">10923</span>-<span class="number">11112</span> (<span class="number">2499</span> slots) master
+   <span class="number">0</span> additional replica(s)
+M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span>
+   slots:<span class="number">189</span>-<span class="number">5460</span> (<span class="number">5272</span> slots) master
+   <span class="number">1</span> additional replica(s)
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All <span class="number">16384</span> slots covered.
+How many slots <span class="keyword">do</span> you want to move (from <span class="number">1</span> to <span class="number">16384</span>)? <span class="number">2500</span>
+---- 这里选择<span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span>节点接受将要移除的slot
+What is the receiving node ID? fda3e4e217f67f72c2082a9d417c7001eff4cfc8
+Please enter all the <span class="built_in">source</span> node IDs.
+  Type <span class="string">'all'</span> to use all the nodes as <span class="built_in">source</span> nodes <span class="keyword">for</span> the <span class="built_in">hash</span> slots.
+  Type <span class="string">'done'</span> once you entered all the <span class="built_in">source</span> nodes IDs.
+---- 这里选择要移除的<span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>节点nodeid
+Source node <span class="comment">#1:b04d24e465d199e9f1a4fe52298dcaa9b48c187d</span>
+Source node <span class="comment">#2:done</span>
+Do you want to proceed with the proposed reshard plan (yes/no)? yes
+</code></pre>
+<p>2：删除master节点<br>删除节点之前使用redis-trib.rb check existNodeIp:port命令检查集群信息，检测该节点上面的slot是否全部移除干净</p>
+<pre><code class="bash">redis-trib.rb check <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+</code></pre>
+<p>输出信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Performing Cluster Check (using node <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>)
+S: <span class="number">73</span>c18b72a7543881feede89f0a249e83ac63b337 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates fda3e4e217f67f72c2082a9d417c7001eff4cfc8
+M: b04d24e465d199e9f1a4fe52298dcaa9b48c187d <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>
+   slots: (<span class="number">0</span> slots) master
+   <span class="number">0</span> additional replica(s)
+M: <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0 <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span>
+   slots:<span class="number">189</span>-<span class="number">5460</span> (<span class="number">5272</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: <span class="number">31</span>a7a5c5b5dbaf0ab7f0b73eb58c08d13a6d02d2 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">51211</span>a7220b37b53d826bc139e7780a06c39c6b0
+M: fda3e4e217f67f72c2082a9d417c7001eff4cfc8 <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span>
+   slots:<span class="number">0</span>-<span class="number">188</span>,<span class="number">5461</span>-<span class="number">11112</span> (<span class="number">5841</span> slots) master
+   <span class="number">1</span> additional replica(s)
+S: e7823da58afdf968948e39259ca80032bee28d6e <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+   slots: (<span class="number">0</span> slots) slave
+   replicates <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5
+M: <span class="number">4</span>cfc061fa365a5f7e2a9ff07c0e3c08f12b7b2c5 <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span>
+   slots:<span class="number">11113</span>-<span class="number">16383</span> (<span class="number">5271</span> slots) master
+   <span class="number">1</span> additional replica(s)
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All <span class="number">16384</span> slots covered.
+</code></pre>
+<p>可看到192.168.0.133:7003节点上的slot已经全部被移除<br>执行删除</p>
+<pre><code class="bash">redis-trib.rb del-node <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span> b04d24e465d199e9f1a4fe52298dcaa9b48c187d
+</code></pre>
+<p>输出信息</p>
+<pre><code class="bash">&gt;&gt;&gt; Removing node b04d24e465d199e9f1a4fe52298dcaa9b48c187d from cluster <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7003</span>
+&gt;&gt;&gt; Sending CLUSTER FORGET messages to the cluster...
+&gt;&gt;&gt; SHUTDOWN the node.
+</code></pre>
+<p>再次检查集群信息会发现已经没有这个节点了</p>
+<p>重启集群<br>把全部redis服务停止<br>删除data目录下文件</p>
+<pre><code class="bash">rm <span class="operator">-f</span> /home/softs/redis-cluster/data/*
+</code></pre>
+<p>启动redis服务<br>由于redis没有配置持久化机制，所以之前的数据会被全部清空<br>重新创建集群</p>
+<pre><code class="bash">redis-trib.rb create --replicas <span class="number">1</span> <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+</code></pre>
+<h1 id="redis集群监控redis-stat">redis集群监控redis-stat</h1><p>源码地址<br><a href="https://github.com/junegunn/redis-stat" target="_blank" rel="external">https://github.com/junegunn/redis-stat</a><br>参考博客<br><a href="http://blog.csdn.net/21aspnet/article/details/50748719" target="_blank" rel="external">http://blog.csdn.net/21aspnet/article/details/50748719</a></p>
+<p>规划在192.168.0.130节点上搭建redis-stat<br>以下是我的搭建记录</p>
+<pre><code class="bash">ssh root@<span class="number">192.168</span>.<span class="number">0.130</span>
+<span class="built_in">cd</span> /home/softs/
+yum install -y ruby
+yum install -y ruby-devel
+yum install -y rubygems
+</code></pre>
+<pre><code class="bash">gem <span class="built_in">source</span> <span class="operator">-a</span> https://ruby.taobao.org/ <span class="comment">#添加淘宝源</span>
+gem <span class="built_in">source</span> -r http://rubygems.org/ <span class="comment">#删除境外源</span>
+</code></pre>
+<pre><code class="bash">[root@localhost softs]<span class="comment"># gem install redis-stat</span>
+Building native extensions.  This could take a while...
+Building native extensions.  This could take a while...
+Building native extensions.  This could take a while...
+ERROR:  Error installing redis-stat:
+redis-stat requires daemons (~&gt; <span class="number">1.1</span>.<span class="number">9</span>, runtime)
+[root@localhost softs]<span class="comment"># gem install redis-stat -v 0.4.12</span>
+Successfully installed daemons-<span class="number">1.1</span>.<span class="number">9</span>
+Successfully installed redis-stat-<span class="number">0.4</span>.<span class="number">12</span>
+<span class="number">2</span> gems installed
+Installing ri documentation <span class="keyword">for</span> daemons-<span class="number">1.1</span>.<span class="number">9</span>...
+Installing ri documentation <span class="keyword">for</span> redis-stat-<span class="number">0.4</span>.<span class="number">12</span>...
+Installing RDoc documentation <span class="keyword">for</span> daemons-<span class="number">1.1</span>.<span class="number">9</span>...
+Installing RDoc documentation <span class="keyword">for</span> redis-stat-<span class="number">0.4</span>.<span class="number">12</span>...
+[root@localhost softs]<span class="comment"># redis-stat 1</span>
+/usr/lib/ruby/site_ruby/<span class="number">1.8</span>/rubygems.rb:<span class="number">233</span>:<span class="keyword">in</span> `activate<span class="string">': can'</span>t activate daemons (~&gt; <span class="number">1.1</span>.<span class="number">9</span>, runtime) <span class="keyword">for</span> [<span class="string">"redis-stat-0.4.12"</span>], already activated daemons-<span class="number">1.2</span>.<span class="number">3</span> <span class="keyword">for</span> [<span class="string">"thin-1.5.1"</span>, <span class="string">"redis-stat-0.4.12"</span>] (Gem::LoadError)
+from /usr/lib/ruby/site_ruby/<span class="number">1.8</span>/rubygems.rb:<span class="number">249</span>:<span class="keyword">in</span> `activate<span class="string">'
+from /usr/lib/ruby/site_ruby/1.8/rubygems.rb:248:in `each'</span>
+from /usr/lib/ruby/site_ruby/<span class="number">1.8</span>/rubygems.rb:<span class="number">248</span>:<span class="keyword">in</span> `activate<span class="string">'
+from /usr/lib/ruby/site_ruby/1.8/rubygems.rb:1082:in `gem'</span>
+from /usr/bin/redis-stat:<span class="number">18</span>
+[root@localhost softs]<span class="comment"># gem uninstall daemons</span>
+Select gem to uninstall:
+ <span class="number">1</span>. daemons-<span class="number">1.1</span>.<span class="number">9</span>
+ <span class="number">2</span>. daemons-<span class="number">1.2</span>.<span class="number">3</span>
+ <span class="number">3</span>. All versions
+&gt; <span class="number">2</span>
+Successfully uninstalled daemons-<span class="number">1.2</span>.<span class="number">3</span>
+[root@localhost softs]<span class="comment"># [root@localhost softs]# redis-stat 1</span>
+-bash: [root@localhost: <span class="built_in">command</span> not found
+[root@localhost softs]<span class="comment"># gem install redis-stat -v 0.4.12</span>
+Successfully installed redis-stat-<span class="number">0.4</span>.<span class="number">12</span>
+<span class="number">1</span> gem installed
+Installing ri documentation <span class="keyword">for</span> redis-stat-<span class="number">0.4</span>.<span class="number">12</span>...
+Installing RDoc documentation <span class="keyword">for</span> redis-stat-<span class="number">0.4</span>.<span class="number">12</span>...
+[root@localhost softs]<span class="comment"># redis-stat 1</span>
+Faraday: you may want to install system_timer <span class="keyword">for</span> reliable timeouts
+[root@localhost softs]<span class="comment"># gem install SystemTimer</span>
+Building native extensions.  This could take a while...
+Successfully installed SystemTimer-<span class="number">1.2</span>.<span class="number">3</span>
+<span class="number">1</span> gem installed
+Installing ri documentation <span class="keyword">for</span> SystemTimer-<span class="number">1.2</span>.<span class="number">3</span>...
+Installing RDoc documentation <span class="keyword">for</span> SystemTimer-<span class="number">1.2</span>.<span class="number">3</span>...
+</code></pre>
+<p>命令行启动redis-stat</p>
+<pre><code class="bash">redis-stat <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span>
+</code></pre>
+<p>以webserver的形式启动，指定端口</p>
+<pre><code class="bash">redis-stat <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.131</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.132</span>:<span class="number">7002</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7001</span> <span class="number">192.168</span>.<span class="number">0.133</span>:<span class="number">7002</span> --server=<span class="number">8080</span> <span class="number">5</span> —daemon
+</code></pre>
+<p>浏览器访问<a href="http://192.168.0.130:8080即可看到实时监控页面" target="_blank" rel="external">http://192.168.0.130:8080即可看到实时监控页面</a></p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag">#redis</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/27/tomcat-memcached实现session共享/" rel="next" title="tomcat+memcached实现session共享">
+                <i class="fa fa-chevron-left"></i> tomcat+memcached实现session共享
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/01/12/2016-year-end-summary/" rel="prev" title="2016年终总结">
+                2016年终总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+        </div>
+
+        
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+        
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/11/25/redis-cluster-redis-stat-build/"
+           data-title="redis集群及redis集群监控redis-stat搭建" data-url="http://qiulongjie.com/2016/11/25/redis-cluster-redis-stat-build/">
+      </div>
+    
+  </div>
+
+
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="http://7xixis.com1.z0.glb.clouddn.com/myPic4_meitu_5.jpg" alt="devilJie" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">devilJie</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">解决问题的能力才是王道</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-name">分类</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">9</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="http://blog.csdn.net/demon_devil_jet" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> CSDN
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#redis集群搭建笔记"><span class="nav-number">1.</span> <span class="nav-text">redis集群搭建笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#节点规划"><span class="nav-number">1.1.</span> <span class="nav-text">节点规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装步骤"><span class="nav-number">1.2.</span> <span class="nav-text">安装步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装ruby"><span class="nav-number">1.2.1.</span> <span class="nav-text">安装ruby</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、下载与上传"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">1、下载与上传</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装redis-3-0-7-gem"><span class="nav-number">1.2.2.</span> <span class="nav-text">安装redis-3.0.7.gem</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方法一"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">方法一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法二"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">方法二</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装redis"><span class="nav-number">1.2.3.</span> <span class="nav-text">安装redis</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">安装</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动集群"><span class="nav-number">1.2.4.</span> <span class="nav-text">启动集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在线添加/删除节点"><span class="nav-number">1.2.5.</span> <span class="nav-text">在线添加/删除节点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#添加master节点"><span class="nav-number">1.2.5.1.</span> <span class="nav-text">添加master节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分配slot"><span class="nav-number">1.2.5.2.</span> <span class="nav-text">分配slot</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#添加对应的slave节点"><span class="nav-number">1.2.5.3.</span> <span class="nav-text">添加对应的slave节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除节点"><span class="nav-number">1.2.5.4.</span> <span class="nav-text">删除节点</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#redis集群监控redis-stat"><span class="nav-number">2.</span> <span class="nav-text">redis集群监控redis-stat</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">devilJie</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+    
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"qiulongjie"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+    
+     
+
+
+    
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
+
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+  
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+
+  
+    <script type="text/javascript" src="http://cdn.staticfile.org/mathjax/2.4.0/MathJax.js"></script>
+    <script type="text/javascript" src="http://cdn.staticfile.org/mathjax/2.4.0/config/TeX-AMS-MML_HTMLorMML.js"></script>
+  
+
+
+  
+  
+
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"16"},"slide":{"type":"slide","bdImg":"3","bdPos":"left","bdTop":"250"}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+
+
+</body>
+</html>
